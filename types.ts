@@ -20,6 +20,25 @@ export interface FeeItem {
   dueDate: string;
 }
 
+export interface Resident {
+  id: string;
+  apartmentId: string;
+  name: string;
+  phone: string;
+  email: string;
+  memberCount: number;
+  entryDate: string;
+  status: 'active' | 'temporary' | 'absent';
+}
+
+export interface AppNotification {
+  id: string;
+  title: string;
+  content: string;
+  date: string;
+  type: 'info' | 'warning' | 'maintenance' | 'success';
+}
+
 export interface Stats {
   totalRevenue: number;
   pendingAmount: number;
