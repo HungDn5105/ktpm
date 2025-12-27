@@ -5,6 +5,15 @@ export enum PaymentStatus {
   OVERDUE = 'OVERDUE'
 }
 
+export interface UserAccount {
+  id: string;
+  email: string;
+  name: string;
+  role: 'admin' | 'resident';
+  apartmentId?: string;
+  avatar?: string;
+}
+
 export interface FeeItem {
   id: string;
   apartmentId: string;
@@ -39,10 +48,23 @@ export interface AppNotification {
   type: 'info' | 'warning' | 'maintenance' | 'success';
 }
 
-export interface Stats {
-  totalRevenue: number;
-  pendingAmount: number;
-  paidCount: number;
-  pendingCount: number;
-  overdueCount: number;
+export interface Activity {
+  id: string;
+  title: string;
+  category: 'sports' | 'community' | 'maintenance' | 'event';
+  date: string;
+  time: string;
+  location: string;
+  description: string;
+}
+
+export interface PoolTicket {
+  id: string;
+  apartmentId: string;
+  residentName: string;
+  date: string;
+  slot: 'morning' | 'afternoon' | 'evening';
+  adultCount: number;
+  childCount: number;
+  status: 'confirmed' | 'used' | 'cancelled';
 }

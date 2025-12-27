@@ -7,10 +7,12 @@ interface FeeModalProps {
   onClose: () => void;
   onSave: (fee: FeeItem) => void;
   fee: FeeItem | null;
+  theme: 'light' | 'dark';
 }
 
-const FeeModal: React.FC<FeeModalProps> = ({ isOpen, onClose, onSave, fee }) => {
+const FeeModal: React.FC<FeeModalProps> = ({ isOpen, onClose, onSave, fee, theme }) => {
   const [formData, setFormData] = useState<Partial<FeeItem>>({});
+  const isDark = theme === 'dark';
 
   useEffect(() => {
     if (fee) {
@@ -32,7 +34,6 @@ const FeeModal: React.FC<FeeModalProps> = ({ isOpen, onClose, onSave, fee }) => 
     
     setFormData(prev => {
       const newData = { ...prev, [name]: isNumber ? Number(value) : value };
-      // Tự động tính tổng cộng
       if (isNumber) {
         const total = (Number(newData.managementFee) || 0) + 
                       (Number(newData.electricity) || 0) + 
@@ -50,51 +51,51 @@ const FeeModal: React.FC<FeeModalProps> = ({ isOpen, onClose, onSave, fee }) => 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-        <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-          <h2 className="text-xl font-bold text-slate-800">
-            {fee ? 'Chỉnh Sửa Khoản Phí' : 'Thêm Phí Mới'}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md transition-all duration-300">
+      <div className={`${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'} rounded-[2rem] border shadow-2xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in duration-300`}>
+        <div className={`px-8 py-6 border-b flex justify-between items-center ${isDark ? 'border-slate-800 bg-slate-900/50' : 'border-slate-50 bg-slate-50/50'}`}>
+          <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>
+            {fee ? 'Cập Nhật Hóa Đơn' : 'Lập Hóa Đơn Mới'}
           </h2>
-          <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
-            <svg className="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button onClick={onClose} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full transition-colors group">
+            <svg className="w-6 h-6 text-slate-500 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="text-sm font-semibold text-slate-700">Mã Căn Hộ</label>
+        <form onSubmit={handleSubmit} className="p-8 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Mã Căn Hộ</label>
               <input 
                 name="apartmentId"
                 value={formData.apartmentId || ''}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                placeholder="Ví dụ: A-101"
+                className={`w-full px-5 py-3 border rounded-2xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-800'}`}
+                placeholder="A-101"
               />
             </div>
-            <div className="space-y-1">
-              <label className="text-sm font-semibold text-slate-700">Tên Cư Dân</label>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Chủ Căn Hộ</label>
               <input 
                 name="residentName"
                 value={formData.residentName || ''}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className={`w-full px-5 py-3 border rounded-2xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-800'}`}
               />
             </div>
-            <div className="space-y-1">
-              <label className="text-sm font-semibold text-slate-700">Kỳ Thu (Tháng/Năm)</label>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Kỳ Thu Phí</label>
               <div className="flex gap-2">
                 <input 
                   name="month"
                   value={formData.month || ''}
                   onChange={handleChange}
                   required
-                  className="w-2/3 px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className={`w-2/3 px-5 py-3 border rounded-2xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-800'}`}
                   placeholder="Tháng"
                 />
                 <input 
@@ -103,17 +104,17 @@ const FeeModal: React.FC<FeeModalProps> = ({ isOpen, onClose, onSave, fee }) => 
                   value={formData.year || ''}
                   onChange={handleChange}
                   required
-                  className="w-1/3 px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className={`w-1/3 px-5 py-3 border rounded-2xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-800'}`}
                 />
               </div>
             </div>
-            <div className="space-y-1">
-              <label className="text-sm font-semibold text-slate-700">Trạng Thái</label>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Trạng Thái</label>
               <select 
                 name="status"
                 value={formData.status || PaymentStatus.PENDING}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className={`w-full px-5 py-3 border rounded-2xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-800'}`}
               >
                 <option value={PaymentStatus.PAID}>Đã thanh toán</option>
                 <option value={PaymentStatus.PENDING}>Chờ thanh toán</option>
@@ -122,46 +123,46 @@ const FeeModal: React.FC<FeeModalProps> = ({ isOpen, onClose, onSave, fee }) => 
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
             {[
-              { name: 'managementFee', label: 'Phí QL' },
+              { name: 'managementFee', label: 'Quản lý' },
               { name: 'electricity', label: 'Điện' },
               { name: 'water', label: 'Nước' },
               { name: 'parking', label: 'Gửi xe' },
             ].map(field => (
-              <div key={field.name} className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase">{field.label}</label>
+              <div key={field.name} className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-tighter ml-1">{field.label}</label>
                 <input 
                   name={field.name}
                   type="number"
                   value={formData[field.name as keyof FeeItem] || 0}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
+                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm font-bold ${isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-800'}`}
                 />
               </div>
             ))}
           </div>
 
-          <div className="mt-6 p-4 bg-blue-50 rounded-2xl flex justify-between items-center">
-            <span className="text-blue-700 font-semibold">Tổng cộng cần thu:</span>
-            <span className="text-xl font-bold text-blue-800">
+          <div className={`mt-8 p-6 rounded-[1.5rem] flex justify-between items-center ${isDark ? 'bg-blue-900/20 border border-blue-900/50' : 'bg-blue-50 border border-blue-100'}`}>
+            <span className={`font-black ${isDark ? 'text-blue-400' : 'text-blue-700'} uppercase tracking-widest text-xs`}>Tổng Cộng:</span>
+            <span className={`text-2xl font-black ${isDark ? 'text-blue-400' : 'text-blue-800'}`}>
               {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(formData.total || 0)}
             </span>
           </div>
 
-          <div className="flex justify-end gap-3 mt-8">
+          <div className="flex justify-end gap-4 mt-10">
             <button 
               type="button"
               onClick={onClose}
-              className="px-6 py-2.5 text-slate-600 font-semibold hover:bg-slate-100 rounded-xl transition-all"
+              className={`px-8 py-3.5 font-bold rounded-2xl transition-all ${isDark ? 'text-slate-400 hover:bg-slate-800' : 'text-slate-500 hover:bg-slate-100'}`}
             >
-              Hủy bỏ
+              Hủy
             </button>
             <button 
               type="submit"
-              className="px-8 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all active:scale-95"
+              className="px-10 py-3.5 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 shadow-xl shadow-blue-500/20 transition-all active:scale-95 uppercase tracking-widest text-sm"
             >
-              Lưu Thay Đổi
+              Lưu Hóa Đơn
             </button>
           </div>
         </form>

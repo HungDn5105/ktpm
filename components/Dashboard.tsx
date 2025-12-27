@@ -1,136 +1,220 @@
 
-import React, { useMemo } from 'react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import React from 'react';
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { FeeItem, PaymentStatus } from '../types';
-import StatCard from './StatCard';
 
 interface DashboardProps {
   data: FeeItem[];
 }
 
-const COLORS = ['#10b981', '#f59e0b', '#ef4444'];
+const STATS_COLORS = ['#cbd5e1', '#3b82f6', '#f97316', '#ef4444', '#10b981'];
 
 const Dashboard: React.FC<DashboardProps> = ({ data }) => {
-  const stats = useMemo(() => {
-    const totalRevenue = data.reduce((acc, curr) => curr.status === PaymentStatus.PAID ? acc + curr.total : acc, 0);
-    const pendingAmount = data.reduce((acc, curr) => curr.status !== PaymentStatus.PAID ? acc + curr.total : acc, 0);
-    const paidCount = data.filter(f => f.status === PaymentStatus.PAID).length;
-    const pendingCount = data.filter(f => f.status === PaymentStatus.PENDING).length;
-    const overdueCount = data.filter(f => f.status === PaymentStatus.OVERDUE).length;
-    
-    return { totalRevenue, pendingAmount, paidCount, pendingCount, overdueCount };
-  }, [data]);
+  const paidCount = data.filter(f => f.status === PaymentStatus.PAID).length;
+  const pendingCount = data.filter(f => f.status === PaymentStatus.PENDING).length;
+  const overdueCount = data.filter(f => f.status === PaymentStatus.OVERDUE).length;
+  const totalCount = data.length || 1;
 
-  const chartData = [
-    { name: 'Tháng 1', revenue: 120000000 },
-    { name: 'Tháng 2', revenue: 150000000 },
-    { name: 'Tháng 3', revenue: 140000000 },
-    { name: 'Tháng 4', revenue: 180000000 },
-    { name: 'Tháng 5', revenue: stats.totalRevenue / 1000 },
+  const paymentChartData = [
+    { name: 'Chờ nộp', value: pendingCount },
+    { name: 'Đã hoàn thành', value: paidCount },
+    { name: 'Quá hạn', value: overdueCount },
   ];
 
-  const pieData = [
-    { name: 'Đã thanh toán', value: stats.paidCount },
-    { name: 'Chờ thanh toán', value: stats.pendingCount },
-    { name: 'Quá hạn', value: stats.overdueCount },
-  ];
+  const totalCollected = data
+    .filter(f => f.status === PaymentStatus.PAID)
+    .reduce((sum, item) => sum + item.total, 0);
 
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12 animate-in fade-in duration-500 transition-colors">
+      {/* Top Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard 
-          title="Tổng Doanh Thu" 
-          value={formatCurrency(stats.totalRevenue)} 
-          trend="+12% so với tháng trước"
-          icon={<svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
-          color="bg-emerald-50"
+        <SummaryCard 
+          title="Hóa đơn tháng này" 
+          value={`${paidCount} / ${totalCount}`} 
+          color="bg-blue-500" 
+          progress={(paidCount / totalCount) * 100}
         />
-        <StatCard 
-          title="Chờ Thu" 
-          value={formatCurrency(stats.pendingAmount)} 
-          trend="Giảm 5% so với tháng trước"
-          icon={<svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
-          color="bg-amber-50"
+        <SummaryCard 
+          title="Tỷ lệ hoàn thành" 
+          value={`${Math.round((paidCount / totalCount) * 100)}%`} 
+          color="bg-emerald-500" 
+          progress={Math.round((paidCount / totalCount) * 100)}
         />
-        <StatCard 
-          title="Đã Thu (Hộ)" 
-          value={stats.paidCount.toString()} 
-          trend="85% tổng số căn"
-          icon={<svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
-          color="bg-blue-50"
+        <SummaryCard 
+          title="Tổng đã thu (VNĐ)" 
+          value={formatCurrency(totalCollected).replace('₫', '').trim()} 
+          color="bg-indigo-600" 
+          progress={75}
         />
-        <StatCard 
-          title="Số Hộ Quá Hạn" 
-          value={stats.overdueCount.toString()} 
-          trend="Cần nhắc nhở ngay"
-          icon={<svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>}
-          color="bg-rose-50"
+        <SummaryCard 
+          title="Căn hộ quá hạn" 
+          value={`${overdueCount} Căn`} 
+          color="bg-rose-500" 
+          progress={(overdueCount / totalCount) * 100}
         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-          <h3 className="text-lg font-bold text-slate-800 mb-6">Biểu Đồ Doanh Thu</h3>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/>
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} />
-                <Tooltip />
-                <Area type="monotone" dataKey="revenue" stroke="#3b82f6" fillOpacity={1} fill="url(#colorRevenue)" strokeWidth={3} />
-              </AreaChart>
-            </ResponsiveContainer>
+        {/* Left Column */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm transition-colors">
+            <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+              <h3 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-tight">Hàng chờ báo cáo mới</h3>
+              <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded text-[10px] font-bold">4 Đang chờ</span>
+            </div>
+            <div className="p-0">
+               <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-400 border-b border-slate-100 dark:border-slate-800">
+                  <tr>
+                    <th className="px-6 py-3 font-bold uppercase">Căn hộ / Loại báo cáo</th>
+                    <th className="px-6 py-3 font-bold uppercase">Thời gian</th>
+                    <th className="px-6 py-3 font-bold uppercase text-right">Trạng thái</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  <PendingReportRow apt="A-201" type="Sự cố điện" time="15:30 Hôm nay" status="pending" />
+                  <PendingReportRow apt="B-504" type="Báo rò nước" time="14:20 Hôm nay" status="reviewing" />
+                  <PendingReportRow apt="C-102" type="Góp ý bảo vệ" time="Hôm qua" status="pending" />
+                </tbody>
+               </table>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm transition-colors">
+            <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-700 dark:bg-slate-800">
+              <h3 className="text-sm font-bold text-white uppercase">Tình trạng thu phí toàn dự án</h3>
+            </div>
+            <div className="p-6">
+               <div className="flex flex-wrap justify-center gap-6 mb-6">
+                  {paymentChartData.map((item, idx) => (
+                    <div key={item.name} className="flex items-center gap-2">
+                      <div className="w-4 h-4 rounded-full" style={{backgroundColor: STATS_COLORS[idx+1]}}></div>
+                      <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold">{item.name}</span>
+                    </div>
+                  ))}
+               </div>
+               <div className="h-56">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={paymentChartData}
+                      cx="50%"
+                      cy="100%"
+                      startAngle={180}
+                      endAngle={0}
+                      innerRadius={80}
+                      outerRadius={140}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {paymentChartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={STATS_COLORS[index+1]} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-          <h3 className="text-lg font-bold text-slate-800 mb-6">Tình Trạng Thanh Toán</h3>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+        {/* Right Column */}
+        <div className="space-y-6">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm transition-colors">
+            <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-700 dark:bg-slate-800">
+              <h3 className="text-sm font-bold text-white uppercase">Cư dân mới tháng này</h3>
+            </div>
+            <div className="p-0">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-400 border-b border-slate-100 dark:border-slate-800">
+                  <tr>
+                    <th className="px-4 py-3 font-bold uppercase">Căn hộ</th>
+                    <th className="px-4 py-3 font-bold uppercase">Họ tên</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+                  <ResidentRow apt="A-402" name="Lê Mạnh Hùng" date="12/05" />
+                  <ResidentRow apt="B-105" name="Phạm Minh Tuấn" date="10/05" />
+                  <ResidentRow apt="C-702" name="Nguyễn Thu Trang" date="05/05" />
+                </tbody>
+              </table>
+            </div>
           </div>
-          <div className="space-y-3 mt-4">
-            {pieData.map((item, idx) => (
-              <div key={item.name} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{backgroundColor: COLORS[idx]}}></div>
-                  <span className="text-sm text-slate-600 font-medium">{item.name}</span>
-                </div>
-                <span className="text-sm font-bold text-slate-800">{item.value} căn</span>
-              </div>
-            ))}
+
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm transition-colors">
+            <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-700 dark:bg-slate-800">
+              <h3 className="text-sm font-bold text-white uppercase">Top hóa đơn lớn nhất</h3>
+            </div>
+            <div className="p-0">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-400 border-b border-slate-100 dark:border-slate-800">
+                  <tr>
+                    <th className="px-4 py-3 font-bold uppercase">Căn hộ</th>
+                    <th className="px-4 py-3 font-bold uppercase text-right">Số tiền</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+                  {data.sort((a,b) => b.total - a.total).slice(0, 5).map(item => (
+                    <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                      <td className="px-4 py-3 text-slate-700 dark:text-slate-300 font-bold">{item.apartmentId}</td>
+                      <td className="px-4 py-3 text-right text-blue-600 dark:text-blue-400 font-bold">{formatCurrency(item.total)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 };
+
+const SummaryCard = ({ title, value, color, progress }: { title: string; value: string; color: string; progress: number }) => (
+  <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group hover:shadow-md transition-all duration-300">
+    <p className="text-[10px] text-slate-400 dark:text-slate-500 text-center font-bold mb-1 uppercase tracking-wider">{title}</p>
+    <h4 className="text-2xl font-black text-slate-800 dark:text-white text-center mb-4">{value}</h4>
+    <div className="absolute bottom-0 left-0 h-1.5 w-full bg-slate-100 dark:bg-slate-800">
+      <div 
+        className={`h-full ${color} transition-all duration-1000 ease-out`} 
+        style={{ width: `${Math.min(100, progress)}%` }}
+      ></div>
+    </div>
+  </div>
+);
+
+const ResidentRow = ({ apt, name, date }: { apt: string; name: string; date: string }) => (
+  <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+    <td className="px-4 py-3">
+        <span className="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded text-[10px] font-bold">{apt}</span>
+    </td>
+    <td className="px-4 py-3">
+        <p className="text-slate-700 dark:text-slate-300 font-semibold">{name}</p>
+        <p className="text-[9px] text-slate-400 dark:text-slate-600">Vào ngày {date}</p>
+    </td>
+  </tr>
+);
+
+const PendingReportRow = ({ apt, type, time, status }: { apt: string; type: string; time: string; status: 'pending' | 'reviewing' }) => (
+  <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+    <td className="px-6 py-4">
+        <p className="text-slate-800 dark:text-white font-bold">{apt}</p>
+        <p className="text-slate-400 mt-0.5">{type}</p>
+    </td>
+    <td className="px-6 py-4 text-slate-500 dark:text-slate-500 font-medium">
+        {time}
+    </td>
+    <td className="px-6 py-4 text-right">
+        <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${status === 'pending' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'}`}>
+            {status === 'pending' ? 'Đang chờ' : 'Đang duyệt'}
+        </span>
+    </td>
+  </tr>
+);
 
 export default Dashboard;

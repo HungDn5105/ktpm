@@ -5,9 +5,10 @@ import { FeeItem, PaymentStatus } from '../types';
 interface FeeTableProps {
   data: FeeItem[];
   onEdit?: (fee: FeeItem) => void;
+  onDelete?: (id: string) => void;
 }
 
-const FeeTable: React.FC<FeeTableProps> = ({ data, onEdit }) => {
+const FeeTable: React.FC<FeeTableProps> = ({ data, onEdit, onDelete }) => {
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
   };
@@ -17,7 +18,7 @@ const FeeTable: React.FC<FeeTableProps> = ({ data, onEdit }) => {
       case PaymentStatus.PAID:
         return (
           <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center w-fit gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
             Đã thanh toán
           </span>
         );
@@ -31,7 +32,7 @@ const FeeTable: React.FC<FeeTableProps> = ({ data, onEdit }) => {
       case PaymentStatus.OVERDUE:
         return (
           <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-600 border border-rose-100 flex items-center w-fit gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-600 animate-pulse"></span>
             Quá hạn
           </span>
         );
@@ -76,21 +77,28 @@ const FeeTable: React.FC<FeeTableProps> = ({ data, onEdit }) => {
                   {getStatusBadge(item.status)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right">
-                  <button 
-                    onClick={() => onEdit?.(item)}
-                    className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all" 
-                    title="Sửa thông tin"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                  </button>
+                  <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button 
+                      onClick={() => onEdit?.(item)}
+                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all" 
+                      title="Sửa thông tin"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                    </button>
+                    <button 
+                      onClick={() => onDelete?.(item.id)}
+                      className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-all" 
+                      title="Xóa bản ghi"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                  </div>
                 </td>
               </tr>
             )) : (
               <tr>
-                <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
-                  Không tìm thấy dữ liệu phí nào phù hợp.
+                <td colSpan={6} className="px-6 py-12 text-center text-slate-500 italic">
+                  Không tìm thấy dữ liệu phù hợp.
                 </td>
               </tr>
             )}
