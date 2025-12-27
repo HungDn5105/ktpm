@@ -1,0 +1,7 @@
+{
+  "name": "Apartment Fee Management System",
+  "description": "A comprehensive system for managing apartment fees, featuring real-time statistics, payment tracking, and automated reporting.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
