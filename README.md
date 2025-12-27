@@ -1,27 +1,20 @@
-# Web Quản Lý Thu Phí Dân Cư
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+</div>
 
-Project web quản lý thu phí dân cư, hỗ trợ quản lý hộ dân, các khoản thu,
-lịch sử thanh toán và thống kê báo cáo. Project được xây dựng phục vụ
-mục đích học tập và bài tập lớn môn Kỹ thuật Phần mềm.
+# Run and deploy your AI Studio app
 
-## Công nghệ sử dụng
-- Frontend: HTML, CSS, JavaScript
-- Backend: Node.js (Express)
-- Database: MySQL
-- Công cụ: VS Code, GitHub
+This contains everything you need to run your app locally.
 
-## Cấu trúc thư mục
-project/
-├── public/
-│ ├── index.html
-│ ├── style.css
-│ └── script.js
-├── server/
-│ ├── index.js
-│ └── routes/
-├── package.json
-└── README.md
+View your app in AI Studio: https://ai.studio/apps/drive/1sC5jZALWkCV1gvegAk2k_Lvs8CGqAMXj
 
-Tài khoản demo (nếu có)
-Username: admin
-Password: 123456
+## Run Locally
+
+**Prerequisites:**  Node.js
+
+
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`
